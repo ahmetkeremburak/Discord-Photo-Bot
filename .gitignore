@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+# Text file(for token)
+*.txt
+
 # Log file
 *.log
 
