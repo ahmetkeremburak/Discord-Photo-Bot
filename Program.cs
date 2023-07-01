@@ -1,14 +1,21 @@
-﻿using Discord;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+using Discord;
 using Discord.WebSocket;
+
 using Serilog;
 
 public class Program
 {
-	public static Task Main(string[] args) => new Program().MainAsync();
+	public static Task Main(string[] args){
+		return new Program().MainAsync();
+	}
 
 	private DiscordSocketClient _client;
 	public async Task MainAsync()
 	{
+		// using IHost host = Host.CreateDefaultBuilder();
 		_client = new DiscordSocketClient();
 
     	_client.Log += Log;
