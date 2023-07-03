@@ -12,9 +12,11 @@
     <PackageReference Include="Discord.Addons.Hosting" Version="5.2.0" />
     <PackageReference Include="Discord.Net" Version="3.10.0" />
     <PackageReference Include="Google.Apis.Drive.v2" Version="1.60.0.3075" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Yaml" Version="2.0.0-preview2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Serilog" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageReference Include="YamlDotNet" Version="13.1.1" />
   </ItemGroup>
 
 </Project>
