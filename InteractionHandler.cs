@@ -7,7 +7,9 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 
-public class InteractionHandler{
+namespace Handlers
+{
+    public class InteractionHandler{
     private readonly DiscordSocketClient _client;
     private readonly InteractionService _commands;
     private readonly IServiceProvider _services;
@@ -39,4 +41,5 @@ public class InteractionHandler{
             Console.WriteLine(ex.ToString());
         }
     }
+}
 }

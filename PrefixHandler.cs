@@ -2,7 +2,9 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 
-public class PrefixHandler{
+namespace Handlers
+{
+    public class PrefixHandler{
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commands;
     private readonly IConfigurationRoot _config;
@@ -42,4 +44,5 @@ public class PrefixHandler{
             argPos:argPos,
             services:null);
     }
+}
 }
