@@ -1,44 +1,81 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 
 using Serilog;
+using Handlers;
+using Discord.Commands;
 
-public class Program
-{
-	public static Task Main(string[] args){
-		return new Program().MainAsync();
+public class program{       
+        
+     // Program entry point
+    public static Task Main(string[] args) => new program().MainAsync();
+
+
+    public async Task MainAsync(){
+        var config = new ConfigurationBuilder()
+        // this will be used more later on
+        .SetBasePath(AppContext.BaseDirectory)
+        // I chose using json files for my config data as I am familiar with them
+        .AddJsonFile("config.json")
+        .Build();
+            
+        using IHost host = Host.CreateDefaultBuilder()
+            .ConfigureServices((_, services) =>
+            services
+            // Add the configuration to the registered services
+            .AddSingleton(config)
+            // Add the DiscordSocketClient, along with specifying the GatewayIntents and user caching
+            .AddSingleton(x => new DiscordSocketClient(new DiscordSocketConfig
+            {
+                GatewayIntents = Discord.GatewayIntents.All,
+                AlwaysDownloadUsers = true
+            }))
+            // Used for slash commands and their registration with Discord
+            .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
+            // Required to subscribe to the various client events used in conjunction with Interactions
+            .AddSingleton<InteractionHandler>()
+            // Adding the prefix Command Service
+            .AddSingleton(x => new CommandService())
+            // Adding the prefix command handler
+            .AddSingleton<PrefixHandler>())
+            .Build();
+
+            await RunAsync(host);
+        }
+
+    public async Task RunAsync(IHost host){
+        using IServiceScope serviceScope = host.Services.CreateScope();
+        IServiceProvider provider = serviceScope.ServiceProvider;
+
+		var _client = provider.GetRequiredService<DiscordSocketClient>();
+        var sCommands = provider.GetRequiredService<InteractionService>();
+		await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
+        var config = provider.GetRequiredService<IConfigurationRoot>();
+		var prefixCommands = provider.GetRequiredService<PrefixHandler>();
+        prefixCommands.AddModule<Modules.PrefixModule>();
+		await prefixCommands.InitializeAsync();
+
+
+        // Subscribe to client log events
+        _client.Log += async (LogMessage msg) => {Console.WriteLine(msg.Message);};
+        // Subscribe to slash command log events
+        sCommands.Log += async (LogMessage msg) => {Console.WriteLine(msg.Message);};
+		
+
+        _client.Ready += async () =>{
+			Console.WriteLine("Bot be ready!");
+            await sCommands.RegisterCommandsToGuildAsync(UInt64.Parse(config["testGuild"]));
+            };
+
+
+            await _client.LoginAsync(Discord.TokenType.Bot, config["tokens:discord"]);
+            await _client.StartAsync();
+
+            await Task.Delay(-1);
+        }
 	}
-
-	private DiscordSocketClient _client;
-	public async Task MainAsync()
-	{
-		// using IHost host = Host.CreateDefaultBuilder();
-		_client = new DiscordSocketClient();
-
-    	_client.Log += Log;
-
-    //  You can assign your bot token to a string, and pass that in to connect.
-    //  This is, however, insecure, particularly if you plan to have your code hosted in a public repository.
-    	var token = File.ReadAllText("token.txt");
-
-    // Some alternative options would be to keep your token in an Environment Variable or a standalone file.
-    // var token = Environment.GetEnvironmentVariable("NameOfYourEnvironmentVariable");
-    // var token = File.ReadAllText("token.txt");
-    // var token = JsonConvert.DeserializeObject<AConfigurationClass>(File.ReadAllText("config.json")).Token;
-
-    	await _client.LoginAsync(TokenType.Bot, token);
-    	await _client.StartAsync();
-
-    // Block this task until the program is closed.
-    	await Task.Delay(-1);
-	}
-
-	private Task Log(LogMessage msg){
-
-	Console.WriteLine(msg.ToString());
-	return Task.CompletedTask;
-}
-}
