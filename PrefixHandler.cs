@@ -32,8 +32,8 @@ namespace Handlers
         int argPos = 0;
 
         if(!(message.HasCharPrefix(_config["prefix"][0], ref argPos)
-        || !message.HasMentionPrefix(_client.CurrentUser, ref argPos)
-        || message.Author.IsBot)){
+        || !message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+        || message.Author.IsBot){
             return;
         }
 
