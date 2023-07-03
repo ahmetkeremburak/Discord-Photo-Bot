@@ -4,6 +4,9 @@
 # Text file(for token)
 *.txt
 
+# configurations for bot
+config.json
+
 # Log file
 *.log
 
