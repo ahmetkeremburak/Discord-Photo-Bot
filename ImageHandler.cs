@@ -26,8 +26,8 @@ namespace Handlers
                 x.Filename.EndsWith(".png"));
 
                 if(imageAttachments.Any()){
-                    var credentialsPath = _config["credentials"];
-                    var folderId = _config["folderID"]; // Replace with actual Google Drive folder ID
+                    var credentialsPath = "Discord-Image-Bot/credentials.json";
+                    var folderId = _config["folderID"];
 
                     var credential = GoogleCredential.FromFile(credentialsPath)
                     .CreateScoped(DriveService.ScopeConstants.Drive)
