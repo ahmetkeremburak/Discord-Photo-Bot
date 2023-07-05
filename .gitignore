@@ -6,6 +6,7 @@
 
 # configurations for bot
 config.json
+credentials.json
 
 # Log file
 *.log
