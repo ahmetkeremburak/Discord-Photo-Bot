@@ -18,6 +18,9 @@ namespace Handlers
             _client.MessageReceived += HandleMessageReceived;
         }
 
+        public async Task InitializeAsync(){
+            _client.MessageReceived += HandleMessageReceived;
+        }
         private async Task HandleMessageReceived(SocketMessage msg){
             
             if(msg.Attachments.Count != 0){
@@ -26,7 +29,7 @@ namespace Handlers
                 x.Filename.EndsWith(".png"));
 
                 if(imageAttachments.Any()){
-                    var credentialsPath = "Discord-Image-Bot/credentials.json";
+                    var credentialsPath = "credentials.json";
                     var folderId = _config["folderID"];
 
                     var credential = GoogleCredential.FromFile(credentialsPath)
@@ -49,8 +52,8 @@ namespace Handlers
                             var request = service.Files.Create(fileMetadata, stream, attachment.ContentType);
                             request.Fields = "id";
                             var file = await request.UploadAsync();
-                            //file.ToString file.id yerine geldi. ne kadar işe yarar bilmiyorum.
-                            await msg.Channel.SendMessageAsync($"Image '{attachment.Filename}' uploaded to Google Drive. File ID: {file.ToString}");
+                            
+                            await msg.Channel.SendMessageAsync($"Image '{attachment.Filename}' uploaded to Google Drive.");
                         }
                         }
                     }
