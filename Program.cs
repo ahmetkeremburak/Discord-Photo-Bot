@@ -10,10 +10,10 @@ using Serilog;
 using Handlers;
 using Discord.Commands;
 
-public class program{       
+public class Program{       
         
      // Program entry point
-    public static Task Main(string[] args) => new program().MainAsync();
+    public static Task Main(string[] args) => new Program().MainAsync();
 
 
     public async Task MainAsync(){
@@ -42,7 +42,9 @@ public class program{
             // Adding the prefix Command Service
             .AddSingleton(x => new CommandService())
             // Adding the prefix command handler
-            .AddSingleton<PrefixHandler>())
+            .AddSingleton<PrefixHandler>()
+            // Adding the image handler
+            .AddSingleton<ImageHandler>())
             .Build();
 
             await RunAsync(host);
@@ -55,14 +57,18 @@ public class program{
 		var _client = provider.GetRequiredService<DiscordSocketClient>();
         var sCommands = provider.GetRequiredService<InteractionService>();
 		await provider.GetRequiredService<InteractionHandler>().InitializeAsync();
+
         var config = provider.GetRequiredService<IConfigurationRoot>();
 		var prefixCommands = provider.GetRequiredService<PrefixHandler>();
         prefixCommands.AddModule<Modules.PrefixModule>();
 		await prefixCommands.InitializeAsync();
 
+        // Inject your ImageHandler class as a parameter
+        var imageHandler = provider.GetRequiredService<ImageHandler>();
+        await imageHandler.InitializeAsync();
 
         // Subscribe to client log events
-        _client.Log += async (LogMessage msg) => {Console.WriteLine(msg.Message);};
+        _client.Log += async (LogMessage msg) => {Console.WriteLine(msg.Message + "\n" + msg.Exception);};
         // Subscribe to slash command log events
         sCommands.Log += async (LogMessage msg) => {Console.WriteLine(msg.Message);};
 		
