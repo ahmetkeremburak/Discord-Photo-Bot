@@ -74,7 +74,7 @@ public class Program{
 		
 
         _client.Ready += async () =>{
-			Console.WriteLine("Bot be ready!");
+			Console.WriteLine("I'm good to go boss!");
             await sCommands.RegisterCommandsToGuildAsync(UInt64.Parse(config["testGuild"]));
             };
 
