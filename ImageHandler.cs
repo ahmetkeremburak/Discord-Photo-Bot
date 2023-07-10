@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using ImService;
 
 namespace Handlers
 {
@@ -11,6 +12,7 @@ namespace Handlers
         private readonly DiscordSocketClient _client;
 
         private readonly IConfigurationRoot _config;
+
 
         public ImageHandler(DiscordSocketClient client, IConfigurationRoot config){
             _client = client;
@@ -29,16 +31,27 @@ namespace Handlers
                 x.Filename.EndsWith(".png"));
 
                 if(imageAttachments.Any()){
-                    var credentialsPath = "credentials.json";
+                    var credentialsPath = "authtoken.json";
                     var folderId = _config["folderID"];
+                    var _tokenSource = new CancellationTokenSource();
+                    var cancelToken = _tokenSource.Token;
+                    var service = new ImageService();
 
-                    var credential = GoogleCredential.FromFile(credentialsPath)
-                    .CreateScoped(DriveService.ScopeConstants.Drive)
-                    .UnderlyingCredential as UserCredential;
 
-                    var service = new DriveService(new BaseClientService.Initializer(){
-                        HttpClientInitializer = credential
-                    });
+                    //First try for getting credentials and service. Keeping it here for now, in case I try with this again.
+                    //var clientSecrets = await GoogleClientSecrets.FromFileAsync(credentialsPath);
+                   // .CreateScoped(DriveService.ScopeConstants.Drive)
+                   // .UnderlyingCredential as UserCredential;
+
+                   //var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                   // clientSecrets.Secrets,
+                   // new[] { DriveService.ScopeConstants.DriveFile },
+                    //"user",
+                    //CancellationToken.None);
+
+                    //var service = new DriveService(new BaseClientService.Initializer(){
+                    //    HttpClientInitializer = credential
+                    //});
 
                     foreach (var attachment in imageAttachments){
                         using (var client = new HttpClient()){
@@ -49,10 +62,7 @@ namespace Handlers
                             };
 
                         using (var stream = new MemoryStream(fileBytes)){
-                            var request = service.Files.Create(fileMetadata, stream, attachment.ContentType);
-                            request.Fields = "id";
-                            var file = await request.UploadAsync();
-                            
+                            await service.UploadFile(stream, attachment.Filename, attachment.ContentType,folderId,attachment.Filename);
                             await msg.Channel.SendMessageAsync($"Image '{attachment.Filename}' uploaded to Google Drive.");
                         }
                         }
