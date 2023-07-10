@@ -8,6 +8,7 @@
 config.json
 credentials.json
 authtoken.json
+ImageService.cs
 
 # Log file
 *.log
