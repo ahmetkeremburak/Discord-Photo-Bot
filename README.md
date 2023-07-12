@@ -1,2 +1,2 @@
 # Discord-Photo-Bot
-Discord Bot to transfer photos to a Cloud
+Discord Bot to store photos posted on chats to Google Drive.
